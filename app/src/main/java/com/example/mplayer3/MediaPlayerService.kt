@@ -85,13 +85,15 @@ class MediaPlayerService : Service(), MediaPlayer.OnCompletionListener,
         mediaPlayer!!.reset()
         try {
             // Set the data source to the mediaFile location
-            mediaPlayer!!.setDataSource(audioList?.get(currentIndex)?.data ?: "")
+            if (audioList.size != 0) {
+                mediaPlayer!!.setDataSource(audioList.get(currentIndex).data)
+                mediaPlayer!!.setAudioStreamType(AudioManager.STREAM_MUSIC)
+                mediaPlayer!!.prepareAsync()
+            }
         } catch (e: NullPointerException) {
             e.printStackTrace()
             stopSelf()
         }
-        mediaPlayer!!.setAudioStreamType(AudioManager.STREAM_MUSIC)
-        mediaPlayer!!.prepareAsync()
     }
 
     private fun loadAudio() {
@@ -144,7 +146,13 @@ class MediaPlayerService : Service(), MediaPlayer.OnCompletionListener,
     }
 
     fun getCurrentAudioTitle(): String {
-        return audioList?.get(currentIndex)?.title ?: "Нет подходящих аудио"
+        var title = "Нет подходящих аудио"
+        try {
+            title = audioList.get(currentIndex).title
+        } catch (e: Exception) {
+            Log.e("MediaPlayerService", e.printStackTrace().toString())
+        }
+        return title
     }
 
     fun playMedia() {
